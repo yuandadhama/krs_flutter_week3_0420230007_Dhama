@@ -16,13 +16,12 @@
 
 ## C.2 Debugging Challenge
 
-'''
-
+```
 setState(() {
 selectedCredits = selectedCredits + "3";
 });
 
-'''
+```
 
 The error occurs because selectedCredits is an int, but "3" is a String, and Dart does not allow adding an integer and a string together, so the types must match (use 3 instead of "3")
 
