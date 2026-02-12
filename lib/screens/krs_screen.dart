@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_krs_application/screens/krs_details_screen.dart';
 
 class KrsScreen extends StatefulWidget {
   @override
@@ -27,6 +28,17 @@ class _KrsScreenState extends State<KrsScreen> {
                 setState(() {
                   selectedCredits += 3;
                 });
+              },
+            ),
+            ElevatedButton(
+              child: Text("View Summary"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => KrsDetailScreen(selectedCredits),
+                  ),
+                );
               },
             ),
           ],
