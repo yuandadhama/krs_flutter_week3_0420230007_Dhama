@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_krs_application/screens/add_course_screen.dart';
 import 'package:flutter_krs_application/screens/krs_details_screen.dart';
-
-final List<Map<String, dynamic>> courses = [
-  {"name": "Data Structure & Algorithms", "credits": 3},
-  {"name": "Database Systems", "credits": 3},
-  {"name": "Computer Networks", "credits": 2},
-  {"name": "Operating Systems", "credits": 4},
-  {"name": "Cloud Computing", "credits": 3},
-  {"name": "Web and Application Security", "credits": 3},
-  {"name": "Practical Applicaion Development", "credits": 3},
-  {"name": "Framework-Based Programming", "credits": 3},
-  {"name": "Object Oriented Design and Patterns", "credits": 3},
-];
 
 class KrsScreen extends StatefulWidget {
   @override
@@ -20,10 +9,6 @@ class KrsScreen extends StatefulWidget {
 
 class _KrsScreenState extends State<KrsScreen> {
   List<Map<String, dynamic>> selectedCourses = [];
-
-  bool isSelected(Map<String, dynamic> course) {
-    return selectedCourses.contains(course);
-  }
 
   int get totalCredits {
     return selectedCourses.fold(
@@ -35,109 +20,85 @@ class _KrsScreenState extends State<KrsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Course")),
-      body: SingleChildScrollView(
-        child: Align(
-          alignment: Alignment.center,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              const Text("Select your course", style: TextStyle(fontSize: 30)),
-              const SizedBox(height: 25),
-              Column(
-                children: courses.map((course) {
-                  return CourseCard(
-                    courseName: course["name"],
-                    totalCredits: course["credits"],
-                    isSelected: isSelected(course),
-                    onSelect: () {
-                      setState(() {
-                        if (!isSelected(course)) {
-                          selectedCourses.add(course);
-                        } else {
-                          selectedCourses.remove(course);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
+      appBar: AppBar(title: const Text("KRS Semester")),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
 
-              Text(
-                "Total Credits: $totalCredits",
-                style: const TextStyle(fontSize: 20),
-              ),
+            const Text("Selected Courses", style: TextStyle(fontSize: 24)),
 
-              const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: selectedCourses.isEmpty
-                    ? null
-                    : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                KrsDetailScreen(selectedCourses, totalCredits),
+            Expanded(
+              child: selectedCourses.isEmpty
+                  ? const Center(child: Text("No course selected"))
+                  : ListView.builder(
+                      itemCount: selectedCourses.length,
+                      itemBuilder: (context, index) {
+                        final course = selectedCourses[index];
+                        return ListTile(
+                          title: Text(course["name"]),
+                          subtitle: Text("${course["credits"]} Credits"),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                selectedCourses.removeAt(index);
+                              });
+                            },
                           ),
                         );
                       },
-                child: const Text("View Summary"),
-              ),
-            ],
-          ),
+                    ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              "Total Credits: $totalCredits",
+              style: const TextStyle(fontSize: 20),
+            ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddCourseScreen()),
+                );
+
+                // 🔐 STATE UPDATE GATE
+                if (result != null) {
+                  setState(() {
+                    selectedCourses.add(result);
+                  });
+                }
+              },
+              child: const Text("Add Course"),
+            ),
+
+            const SizedBox(height: 10),
+
+            ElevatedButton(
+              onPressed: selectedCourses.isEmpty
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              KrsDetailScreen(selectedCourses, totalCredits),
+                        ),
+                      );
+                    },
+              child: const Text("View Summary"),
+            ),
+          ],
         ),
       ),
-    );
-  }
-}
-
-class CourseCard extends StatelessWidget {
-  final String courseName;
-  final int totalCredits;
-  final bool isSelected;
-  final VoidCallback onSelect;
-
-  const CourseCard({
-    super.key,
-    required this.courseName,
-    required this.totalCredits,
-    required this.isSelected,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 400,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.purple.shade100 : Colors.white,
-            border: Border.all(color: Colors.purple),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(courseName, style: const TextStyle(fontSize: 16)),
-                  Text("$totalCredits Credits"),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: onSelect,
-                child: Text(isSelected ? "Remove" : "Add"),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-      ],
     );
   }
 }
